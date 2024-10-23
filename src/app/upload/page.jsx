@@ -181,10 +181,10 @@ const generateMermaidCode = async (text) => {
       }
 
       const generatedMermaidCode = await generateMermaidCode(textContent);
-
+      console.log(extractMermaidDiagram(generatedMermaidCode))
       // 세션 스토리지에 텍스트와 Mermaid 코드 저장
       sessionStorage.setItem("content", textContent);
-      sessionStorage.setItem("mermaidCode", generatedMermaidCode);
+      sessionStorage.setItem("mermaidCode", extractMermaidDiagram(generatedMermaidCode));
 
       // /done 페이지로 이동
       router.push("/done");

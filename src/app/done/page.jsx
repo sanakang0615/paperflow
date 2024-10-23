@@ -9,8 +9,8 @@ import { GradientBackground } from '@/components/gradient'
 import { Container } from '@/components/container'
 import { Navbar } from '@/components/navbar'
 import { Subheading, Heading, Lead } from '@/components/text'
-
-export default function Upload() {
+import MermaidComponent from "@/components/mermaid-component";
+export default function Done() {
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -36,13 +36,12 @@ export default function Upload() {
         <Lead className="mt-6 max-w-3xl">
           Track progress, manage versions, and collaborate efficiently.
         </Lead>
-        <h1 className="text-2xl font-bold">Upload Complete!</h1>
-        <p className="mt-4">Here is the extracted content from your PDF:</p>
-        <pre className="p-4 mt-2 bg-gray-100 rounded">{content}</pre>
-
-        <h2 className="text-xl font-semibold mt-8">Mermaid Diagram Code:</h2>
-        <pre className="p-4 mt-2 bg-gray-100 rounded">{mermaidCode}</pre>
-        
+        <div className="divide-y divide-gray-200 overflow-hidden rounded-lg bg-white shadow">
+          <div className="px-4 py-5 sm:px-6">
+            Your Paper Diagram
+          </div>
+          <div className="px-4 py-5 sm:p-6"><MermaidComponent mermaidCode={mermaidCode} id="paper-diagram"/></div>
+        </div>
       </Container>
       <div className="isolate flex justify-center p-6"></div>
     </main>
