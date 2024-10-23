@@ -185,12 +185,11 @@ export default function Done() {
       <GradientBackground />
       <Container>
         <Navbar />
-        <Subheading className="mt-16">Panel</Subheading>
-        <Heading as="h1" className="mt-2">Paper Flow Done!</Heading>
-        <Lead className="mt-6 max-w-3xl">
+        <Heading as="h1" className="mt-20 text-center ">Your Paper Flow</Heading>
+        {/* <Lead className="mt-6 mb-20 max-w-3xl mx-auto text-center text-gray-700">
           Track progress, manage versions, and collaborate efficiently.
-        </Lead>
-        <div className="divide-y mt-14 divide-gray-200 overflow-hidden rounded-lg bg-white shadow flex flex-col items-center">
+        </Lead> */}
+        <div className="divide-y mt-20 divide-gray-200 overflow-hidden rounded-lg bg-white shadow flex flex-col items-center">
           <div className="px-4 py-5 sm:px-6 text-center font-semibold text-lg">
             {'📄 '+content.slice(0, 78)+'...'}
           </div>
