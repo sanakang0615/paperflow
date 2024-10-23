@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation"; // next/router 대신 next/navigation 사용
+import "@/utils/pdfWorkerPolyfill";
 import * as pdfjsLib from "pdfjs-dist/webpack";
 import { getCompletion } from "@/components/openai-helper";
 import { GradientBackground } from '@/components/gradient';
