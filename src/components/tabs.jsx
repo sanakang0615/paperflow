@@ -16,7 +16,7 @@ const tabs = [
   { name: 'MeetingVis', href: '#', current: false },
   { name: 'VIVID', href: '#', current: false },
   { name: 'PaperWeaver', href: '#', current: true },
-  { name: '+ Add a new paper', href: '#', current: false },
+  { name: '+ Add a new paper', href: '/upload', current: false },
 ]
 
 function classNames(...classes) {

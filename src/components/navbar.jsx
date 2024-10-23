@@ -12,9 +12,8 @@ import { Logo } from './logo'
 import { PlusGrid, PlusGridItem, PlusGridRow } from './plus-grid'
 
 const links = [
-  { href: '/pricing', label: 'Pricing' },
   { href: '/panel', label: 'My Hub' },
-  { href: '/upload', label: 'Add a new paper' },
+  { href: '/upload', label: '➕ Add a new paper' },
 ]
 
 function DesktopNav() {

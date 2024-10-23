@@ -29,25 +29,40 @@ export default function Panel() {
     <GradientBackground />
     <Container>
       <Navbar />
-      <Subheading className="mt-16">Panel</Subheading>
-      <Heading as="h1" className="mt-2">
+      <Heading as="h1" className="mt-20 text-center">
         Research Control Hub
       </Heading>
-      <Lead className="mt-6 max-w-3xl">
+      <Lead className="mt-6 mb-14 max-w-3xl mx-auto text-center text-gray-700">
         Track progress, manage versions, and collaborate efficiently.
       </Lead>
-      <div>
+      <div >
         
-        <dl className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-3">
-          {stats.map((item) => (
-            <div key={item.name} className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
-              <dt className="truncate text-sm font-medium text-gray-500">{item.name}</dt>
-              <dd className="mt-1 text-3xl font-semibold tracking-tight text-gray-900">{item.stat}</dd>
-            </div>
-          ))}
-        </dl>
+      <dl className="mt-2 grid grid-cols-1 gap-5 sm:grid-cols-3">
+      {stats.map((item, index) => (
+        <div
+          key={item.name}
+          className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6"
+        >
+          <dt
+            className="truncate text-sm font-medium text-gray-500 animate-smooth-fade-in"
+            
+          >
+            {item.name}
+          </dt>
+          <dd
+            className="mt-1 text-3xl font-semibold tracking-tight text-gray-900 animate-smooth-fade-in"
+            
+          >
+            {item.stat}
+          </dd>
+        </div>
+      ))}
+    </dl>
       </div>
+      <div className="mt-16">
+
       <Tabs/>
+      </div>
       <VersionList/>
     </Container>
     <div className="isolate flex justify-center p-6 ">
