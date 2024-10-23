@@ -67,16 +67,16 @@ function FeatureSection() {
 function BentoSection() {
   return (
     <Container>
-      <Subheading>Sales</Subheading>
+      <Subheading>Research</Subheading>
       <Heading as="h3" className="mt-2 max-w-3xl">
-        Know more about your customers than they do.
+        Know more about your research than you do.
       </Heading>
 
       <div className="mt-10 grid grid-cols-1 gap-4 sm:mt-16 lg:grid-cols-6 lg:grid-rows-2">
         <BentoCard
-          eyebrow="Insight"
-          title="Get perfect clarity"
-          description="Radiant uses social engineering to build a detailed financial picture of your leads. Know their budget, compensation package, social security number, and more."
+          eyebrow="Support"
+          title="Know more about your research than you do"
+          description="ResearchFlow is more than just a tool—it is a dynamic research partner designed to help researchers uncover insights they might have overlooked. By analyzing your academic focus and mapping out your research flow, it identifies connections and opportunities that aren't obvious at first glance. This ensures your research progresses in the right direction from the start. Beyond academic papers, ResearchFlow integrates data from multiple sources, including seminar recordings, research notes, experimental results, and brainstorming sessions, consolidating them in one place for easy access."
           graphic={
             <div className="h-80 bg-[url(/screenshots/profile.png)] bg-[size:1000px_560px] bg-[left_-109px_top_-112px] bg-no-repeat" />
           }
@@ -84,9 +84,9 @@ function BentoSection() {
           className="max-lg:rounded-t-4xl lg:col-span-3 lg:rounded-tl-4xl"
         />
         <BentoCard
-          eyebrow="Analysis"
-          title="Undercut your competitors"
-          description="With our advanced data mining, you’ll know which companies your leads are talking to and exactly how much they’re being charged."
+          eyebrow="Insight"
+          title="Clarity in every step of your research journey"
+          description="ResearchFlow empowers researchers to view their work holistically by transforming complex research logic into intuitive visual networks. It enables you to visualize the entire structure of your research—showing how each hypothesis, method, and conclusion connects—so that nothing important gets lost in the process. This clear layout enhances your ability to evaluate your work critically and make improvements before submission, minimizing unexpected feedback during peer review. What sets ResearchFlow apart from traditional citation-based tools is its focus on personalized research analysis."
           graphic={
             <div className="absolute inset-0 bg-[url(/screenshots/competitors.png)] bg-[size:1100px_650px] bg-[left_-38px_top_-73px] bg-no-repeat" />
           }
@@ -95,8 +95,8 @@ function BentoSection() {
         />
         <BentoCard
           eyebrow="Speed"
-          title="Built for power users"
-          description="It’s never been faster to cold email your entire contact list using our streamlined keyboard shortcuts."
+          title="Built for those who need efficiency"
+          description="ResearchFlow saves time by streamlining literature reviews and research direction-setting processes. With an intuitive platform, researchers can shift their focus back to core research activities. The tool offers seamless integration of all research materials, ensuring you no longer have to switch between multiple platforms."
           graphic={
             <div className="flex size-full pl-10 pt-10">
               <Keyboard highlighted={['LeftCommand', 'LeftShift', 'D']} />
@@ -106,15 +106,15 @@ function BentoSection() {
         />
         <BentoCard
           eyebrow="Source"
-          title="Get the furthest reach"
-          description="Bypass those inconvenient privacy laws to source leads from the most unexpected places."
+          title="Stay ahead with cutting-edge research trends"
+          description="ResearchFlow doesn't stop at published papers. It also includes insights into emerging trends and unpublished academic developments, helping researchers explore innovative ideas. Our tool ensures that your research remains both original and aligned with current advancements, allowing you to maintain relevance and creativity."
           graphic={<LogoCluster />}
           className="lg:col-span-2"
         />
         <BentoCard
           eyebrow="Limitless"
-          title="Sell globally"
-          description="Radiant helps you sell in locations currently under international embargo."
+          title="Expand your reach globally"
+          description="ResearchFlow supports collaborative research across international borders, even in restricted regions. By fostering cross-disciplinary connections, it enables researchers to expand their networks and find new collaboration opportunities."
           graphic={<Map />}
           className="max-lg:rounded-b-4xl lg:col-span-2 lg:rounded-br-4xl"
         />
@@ -183,16 +183,16 @@ export default function Home() {
     <div className="overflow-hidden">
       <Hero />
       <main>
-        <Container className="mt-10">
+        {/* <Container className="mt-10">
           <LogoCloud />
-        </Container>
+        </Container> */}
         <div className="bg-gradient-to-b from-white from-50% to-gray-100 py-32">
           <FeatureSection />
           <BentoSection />
         </div>
-        <DarkBentoSection />
+        {/* <DarkBentoSection /> */}
       </main>
-      <Testimonials />
+      {/* <Testimonials /> */}
       <Footer />
     </div>
   )
