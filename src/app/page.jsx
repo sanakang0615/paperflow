@@ -38,7 +38,7 @@ function Hero() {
           </p>
           <div className="mt-12 flex flex-col gap-x-6 gap-y-4 sm:flex-row">
             <Button href="/upload">Get started</Button>
-            <Button variant="secondary" href="/pricing">
+            <Button variant="secondary">
               Examples
             </Button>
           </div>
