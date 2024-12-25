@@ -14,6 +14,8 @@ import { IoAdd, IoCheckmark } from "react-icons/io5";
 export default function Upload() {
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [apiKey, setApiKey] = useState("");
+  const [fileName, setFileName] = useState('');
   const router = useRouter();
   const systemPrompt = `  
     아래의 Stage 1 - Stage 2 - Stage 3 순서로 생각의 흐름을 따라가세요. Stage 1과 2는 내부적으로 처리하고, 최종 답변으로 Stage 3의 Mermaid 코드만 제공해주세요. claim-evidence 까지도 모두 다이어그램에 들어가야 해. 한글로 부탁해.
@@ -155,7 +157,7 @@ const generateMermaidCode = async (text) => {
     const userPrompt = "Please provide the Mermaid Diagram code for the following text: " + text;
     
     // Fetch the completion result using the OpenAI API helper function
-    const response = await getCompletion("gpt-4o-mini", systemPrompt, userPrompt);
+    const response = await getCompletion("gpt-4o-mini", systemPrompt, userPrompt, apiKey);
 
     console.log("응답: ", response)
     // Assuming the response contains the Mermaid code in the correct format, return it
@@ -186,6 +188,7 @@ const generateMermaidCode = async (text) => {
       // 세션 스토리지에 텍스트와 Mermaid 코드 저장
       sessionStorage.setItem("content", textContent);
       sessionStorage.setItem("mermaidCode", extractMermaidDiagram(generatedMermaidCode));
+      sessionStorage.setItem("filename", fileName); // 파일명 저장
 
       // /done 페이지로 이동
       router.push("/done");
@@ -197,7 +200,23 @@ const generateMermaidCode = async (text) => {
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
-    if (file) setFile(file);
+    if (file) {
+      let processedFileName = file.name;
+
+      if (processedFileName.endsWith(".pdf")) {
+        processedFileName = processedFileName.slice(0, -4);
+      }
+
+      if (processedFileName.length > 78) {
+        processedFileName = processedFileName.slice(0, 78) + "...";
+      }
+
+      console.log("file: ", file)
+      console.log("file.name: ", processedFileName)
+
+      setFile(file);
+      setFileName(processedFileName);
+    }
   };
 
   const handleUpload = () => {
@@ -218,6 +237,24 @@ const generateMermaidCode = async (text) => {
     </Lead>
 
     <div className="p-10 mt-10 max-w-lg mx-auto bg-white rounded-2xl shadow-lg">
+      {/* API Key 입력 */}
+      <div className="mb-6">
+            <label
+              htmlFor="api-key"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              API Key
+            </label>
+            <input
+              id="api-key"
+              type="text"
+              value={apiKey}
+              onChange={(e) => setApiKey(e.target.value)}
+              placeholder="Enter your API key..."
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400
+                         focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+            />
+          </div>
       <label
         htmlFor="file-upload"
         className="flex flex-col items-center justify-center w-full h-56 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer 

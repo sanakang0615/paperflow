@@ -11,7 +11,16 @@ import { Navbar } from '@/components/navbar'
 import { Subheading, Heading, Lead } from '@/components/text'
 import MermaidComponent from "@/components/mermaid-component";
 export default function Done() {
-  const [file, setFile] = useState(null);
+  const [filename, setFilename] = useState('');
+  const [apiKey, setApiKey] = useState("");
+
+  useEffect(() => {
+    // 세션 스토리지에서 파일명 가져오기
+    const savedFilename = sessionStorage.getItem("filename");
+    if (savedFilename) {
+      setFilename(savedFilename);
+    }
+  }, []);
   const [loadingUpgrade, setLoadingUpgrade] = useState(false);
   const router = useRouter();
   const [content, setContent] = useState("");
@@ -153,11 +162,11 @@ export default function Done() {
     setLoadingUpgrade(true)
     try {
       const userPrompt = "Please provide the updated Mermaid Diagram code. The content was: `" + content + "`, and the diagram was: ```"+ mermaidCode
-      const response = await getCompletion("gpt-4o-mini", upgradeSystemPrompt, userPrompt);
+      const response = await getCompletion("gpt-4o-mini", upgradeSystemPrompt, userPrompt, apiKey);
 
-      console.log("응답: ", response)
+      // console.log("응답: ", response)
       setMermaidCode(extractMermaidDiagram(response))
-      console.log("Enhanced:", extractMermaidDiagram(response))
+      // ("Enhanced:", extractMermaidDiagram(response))
       setLoadingUpgrade(false)
       return extractMermaidDiagram(response);
       
@@ -185,13 +194,29 @@ export default function Done() {
       <GradientBackground />
       <Container>
         <Navbar />
-        <Heading as="h1" className="mt-20 text-center ">Your Paper Flow</Heading>
-        {/* <Lead className="mt-6 mb-20 max-w-3xl mx-auto text-center text-gray-700">
-          Track progress, manage versions, and collaborate efficiently.
-        </Lead> */}
-        <div className="divide-y mt-20 divide-gray-200 overflow-hidden rounded-lg bg-white shadow flex flex-col items-center">
+        <Heading as="h1" className="mt-20 text-center mb-6">Your Paper Flow</Heading>
+        {/* API Key 입력 */}
+        <div className="mb-12">
+            <label
+              htmlFor="api-key"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              API Key
+            </label>
+            <input
+              id="api-key"
+              type="text"
+              value={apiKey}
+              onChange={(e) => setApiKey(e.target.value)}
+              placeholder="Enter your API key..."
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400
+                         focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+            />
+          </div>
+        <div className="divide-y mt-18 divide-gray-200 overflow-hidden rounded-lg bg-white shadow flex flex-col items-center">
           <div className="px-4 py-5 sm:px-6 text-center font-semibold text-lg">
-            {'📄 '+content.slice(0, 78)+'...'}
+            {/* {'📄 '+content.slice(0, 78)+'...'} */}
+            {'📄 '+ filename}
           </div>
           <div className="flex justify-center items-center w-full h-full" style={{ minHeight: '100vh' }}>
             <div className="my-12 w-full max-w-4xl">
