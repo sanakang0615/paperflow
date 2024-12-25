@@ -1,22 +1,24 @@
-'use client';
+"use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation"; // next/router 대신 next/navigation 사용
+import { useRouter } from "next/navigation";
 import "@/utils/pdfWorkerPolyfill";
 import * as pdfjsLib from "pdfjs-dist/webpack";
 import { getCompletion } from "@/components/openai-helper";
-import { GradientBackground } from '@/components/gradient';
-import { Container } from '@/components/container';
-import { Navbar } from '@/components/navbar';
-import { Subheading, Heading, Lead } from '@/components/text';
+import { GradientBackground } from "@/components/gradient";
+import { Container } from "@/components/container";
+import { Navbar } from "@/components/navbar";
+import { Lead, Heading } from "@/components/text";
 import { IoAdd, IoCheckmark } from "react-icons/io5";
 
 export default function Upload() {
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [apiKey, setApiKey] = useState("");
-  const [fileName, setFileName] = useState('');
+  const [fileName, setFileName] = useState("");
   const router = useRouter();
+
+  // 시스템 프롬프트 예시
   const systemPrompt = `  
     아래의 Stage 1 - Stage 2 - Stage 3 순서로 생각의 흐름을 따라가세요. Stage 1과 2는 내부적으로 처리하고, 최종 답변으로 Stage 3의 Mermaid 코드만 제공해주세요. claim-evidence 까지도 모두 다이어그램에 들어가야 해. 한글로 부탁해.
     
@@ -130,93 +132,126 @@ export default function Upload() {
     L1 --> C1
     L2 --> C2
 `
-function extractMermaidDiagram(text) {
-  // Triple backticks로 둘러싸인 모든 코드 블록을 추출
-  const pattern = /```(.*?)```/gs;
-  const diagrams = [...text.matchAll(pattern)].map(match => match[1]);
-  
-  if (diagrams.length === 0) {
-    return text;
-  }
 
-  // 'mermaid'로 시작하면 삭제하고 나머지 반환
-  const cleanedDiagrams = diagrams.map(diagram => {
-    let cleanedDiagram = diagram.trim();
-    if (cleanedDiagram.startsWith('mermaid')) {
-      cleanedDiagram = cleanedDiagram.slice('mermaid'.length).trim();
+  // 유틸: OpenAI 응답에서 mermaid diagram 코드만 추출
+  function extractMermaidDiagram(text) {
+    const pattern = /```(.*?)```/gs;
+    const diagrams = [...text.matchAll(pattern)].map((match) => match[1]);
+
+    if (diagrams.length === 0) return text;
+
+    // 'mermaid'로 시작하면 해당 문자열 제거
+    let cleanedDiagram = diagrams[0].trim();
+    if (cleanedDiagram.startsWith("mermaid")) {
+      cleanedDiagram = cleanedDiagram.slice("mermaid".length).trim();
     }
+
     return cleanedDiagram;
-  });
-
-  return cleanedDiagrams[0];
-}
-
-const generateMermaidCode = async (text) => {
-  try {
-    // Call the OpenAI API with the provided system prompt and user prompt
-    const userPrompt = "Please provide the Mermaid Diagram code for the following text: " + text;
-    
-    // Fetch the completion result using the OpenAI API helper function
-    const response = await getCompletion("gpt-4o-mini", systemPrompt, userPrompt, apiKey);
-
-    console.log("응답: ", response)
-    // Assuming the response contains the Mermaid code in the correct format, return it
-    return extractMermaidDiagram(response);  // Assuming you have this function to extract Mermaid code
-  } catch (error) {
-    console.error("Error generating Mermaid diagram:", error);
-    throw error;
   }
-};
+
+  // 메인 OpenAI 호출 함수
+  const generateMermaidCode = async (text) => {
+    try {
+      const userPrompt = "Please provide the Mermaid Diagram code for the following text: " + text;
+      const response = await getCompletion("gpt-4o-mini", systemPrompt, userPrompt, apiKey);
+      return extractMermaidDiagram(response);
+    } catch (error) {
+      console.error("Error generating Mermaid diagram:", error);
+      throw error;
+    }
+  };
+
+  const handleFileChange = (e) => {
+    const selected = e.target.files[0];
+    if (selected) {
+      let processedFileName = selected.name;
+      if (processedFileName.endsWith(".pdf")) {
+        processedFileName = processedFileName.slice(0, -4);
+      }
+      if (processedFileName.length > 78) {
+        processedFileName = processedFileName.slice(0, 78) + "...";
+      }
+      setFile(selected);
+      setFileName(processedFileName);
+    }
+  };
 
   const extractTextFromPDF = async (pdfFile) => {
     setLoading(true);
     const fileReader = new FileReader();
 
     fileReader.onload = async function () {
-      const typedArray = new Uint8Array(this.result);
-      const pdf = await pdfjsLib.getDocument(typedArray).promise;
-      let textContent = '';
+      try {
+        const typedArray = new Uint8Array(this.result);
+        const pdf = await pdfjsLib.getDocument(typedArray).promise;
+        let textContent = "";
 
-      for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber++) {
-        const page = await pdf.getPage(pageNumber);
-        const pageText = await page.getTextContent();
-        const pageStrings = pageText.items.map(item => item.str);
-        textContent += pageStrings.join(" ");
+        for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber++) {
+          const page = await pdf.getPage(pageNumber);
+          const pageText = await page.getTextContent();
+          const pageStrings = pageText.items.map((item) => item.str);
+          textContent += pageStrings.join(" ");
+        }
+
+        // 이제 OpenAI 호출하여 mermaid 코드 생성
+        const generatedMermaidCode = await generateMermaidCode(textContent);
+
+        // 세션 스토리지(또는 로컬 스토리지)에서 기존 프로젝트 리스트를 가져온 후 업데이트
+        saveToStorage(fileName, generatedMermaidCode, textContent);
+
+        // /done 페이지로 이동
+        router.push("/done");
+      } catch (err) {
+        console.error(err);
       }
-
-      const generatedMermaidCode = await generateMermaidCode(textContent);
-      // 세션 스토리지에 텍스트와 Mermaid 코드 저장
-      sessionStorage.setItem("content", textContent);
-      sessionStorage.setItem("mermaidCode", extractMermaidDiagram(generatedMermaidCode));
-      sessionStorage.setItem("filename", fileName); // 파일명 저장
-
-      // /done 페이지로 이동
-      router.push("/done");
       setLoading(false);
     };
 
     fileReader.readAsArrayBuffer(pdfFile);
   };
 
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      let processedFileName = file.name;
+  /**
+   * [핵심] 스토리지에 PDF명별 Mermaid 버전 리스트를 관리한다.
+   * 예시 구조:
+   * [
+   *   {
+   *     pdfName: "SamplePaper", 
+   *     content: "pdf 전문 텍스트(Optional)",
+   *     MermaidList: ["mermaidCode1", "mermaidCode2", ...],
+   *   },
+   *   {
+   *     pdfName: "OtherPaper",
+   *     MermaidList: [...],
+   *   }
+   * ]
+   */
+  const saveToStorage = (pdfName, newMermaidCode, fullText) => {
+    // 세션 스토리지 or 로컬 스토리지 -> 여기서는 세션 스토리지 예시
+    let storedData = sessionStorage.getItem("paperList");
+    let paperList = storedData ? JSON.parse(storedData) : [];
 
-      if (processedFileName.endsWith(".pdf")) {
-        processedFileName = processedFileName.slice(0, -4);
-      }
-
-      if (processedFileName.length > 78) {
-        processedFileName = processedFileName.slice(0, 78) + "...";
-      }
-
-      console.log("file: ", file)
-      console.log("file.name: ", processedFileName)
-
-      setFile(file);
-      setFileName(processedFileName);
+    // pdfName이 이미 존재하면 그 paper 객체에만 버전을 추가하고,
+    // 없다면 새 paper 객체를 만들고, MermaidList에 첫 버전을 넣는다.
+    const existingPaperIndex = paperList.findIndex((item) => item.pdfName === pdfName);
+    if (existingPaperIndex >= 0) {
+      // 이미 존재 -> 메모리스트만 추가
+      paperList[existingPaperIndex].MermaidList.push(newMermaidCode);
+    } else {
+      // 새롭게 추가
+      paperList.push({
+        pdfName,
+        // optional: content를 굳이 매번 전체텍스트를 저장해야할 필요가 있으면 추가
+        // content: fullText, 
+        MermaidList: [newMermaidCode],
+      });
     }
+
+    sessionStorage.setItem("paperList", JSON.stringify(paperList));
+
+    // 또한 /done 페이지에서 당장 보여줄 데이터(가장 최근 업로드된 것)를 위해
+    sessionStorage.setItem("filename", pdfName);
+    sessionStorage.setItem("content", fullText); // 굳이 전체 텍스트가 필요하다면
+    sessionStorage.setItem("mermaidCode", newMermaidCode); 
   };
 
   const handleUpload = () => {
@@ -225,20 +260,19 @@ const generateMermaidCode = async (text) => {
 
   return (
     <main className="overflow-hidden bg-gray-100 min-h-screen">
-  <GradientBackground />
-  <Container>
-    <Navbar />
-    
-    <Heading as="h1" className="mt-20 text-center text-gray-900">
-      Upload a new paper
-    </Heading>
-    <Lead className="mt-6 mb-20 max-w-3xl mx-auto text-center text-gray-700">
-      Track progress, manage versions, and collaborate efficiently.
-    </Lead>
+      <GradientBackground />
+      <Container>
+        <Navbar />
+        <Heading as="h1" className="mt-20 text-center text-gray-900">
+          Upload a new paper
+        </Heading>
+        <Lead className="mt-6 mb-20 max-w-3xl mx-auto text-center text-gray-700">
+          Track progress, manage versions, and collaborate efficiently.
+        </Lead>
 
-    <div className="p-10 mt-10 max-w-lg mx-auto bg-white rounded-2xl shadow-lg">
-      {/* API Key 입력 */}
-      <div className="mb-6">
+        <div className="p-10 mt-10 max-w-lg mx-auto bg-white rounded-2xl shadow-lg">
+          {/* API Key 입력 */}
+          <div className="mb-6">
             <label
               htmlFor="api-key"
               className="block text-sm font-medium text-gray-700 mb-1"
@@ -249,83 +283,84 @@ const generateMermaidCode = async (text) => {
               id="api-key"
               type="text"
               value={apiKey}
-              onChange={(e) => setApiKey(e.target.value)}
+              onChange={(e) => {setApiKey(e.target.value); sessionStorage.setItem("MY_API_KEY", e.target.value);}}
               placeholder="Enter your API key..."
               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400
                          focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
             />
           </div>
-      <label
-        htmlFor="file-upload"
-        className="flex flex-col items-center justify-center w-full h-56 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer 
-                  hover:border-indigo-500 hover:bg-indigo-50 transition-all duration-200 ease-in-out"
-      >
-        {file ? (
-          <>
-            <IoCheckmark className="text-4xl text-indigo-500" />
-            <span className="mt-2 text-lg font-medium text-gray-600">
-              Upload Complete!
-            </span>
-          </>
-        ) : (
-          <>
-            <IoAdd className="text-5xl text-gray-400" />
-            <span className="mt-4 text-sm font-medium text-gray-500">
-              Click to Upload
-            </span>
-          </>
-        )}
-        <input
-          id="file-upload"
-          type="file"
-          onChange={handleFileChange}
-          className="hidden"
-        />
-      </label>
 
-      <button
-        onClick={handleUpload}
-        disabled={loading}
-        className={`mt-8 w-full inline-flex items-center justify-center px-5 py-3 text-sm font-semibold 
-                    text-white/90 rounded-xl shadow-md transition-all duration-300 ease-in-out ${
-                      loading
-                        ? 'bg-gradient-to-r from-gray-400/70 to-gray-500/70 cursor-not-allowed'
-                        : 'bg-gradient-to-r from-indigo-500/80 via-purple-500/80 to-pink-500/80 hover:from-indigo-600/90 hover:via-purple-600/90 hover:to-pink-600/90'
-                    } focus:outline-none focus:ring-4 focus:ring-indigo-300/50`}
-      >
-  {loading ? (
-    <>
-      <svg
-        className="animate-spin h-5 w-5 mr-2 text-white/70"
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
-      >
-        <circle
-          className="opacity-25"
-          cx="12"
-          cy="12"
-          r="10"
-          stroke="currentColor"
-          strokeWidth="4"
-        ></circle>
-        <path
-          className="opacity-75"
-          fill="currentColor"
-          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-        ></path>
-      </svg>
-      Uploading...
-    </>
-  ) : (
-    "Upload and Process ✨"
-  )}
-</button>
+          {/* 파일 업로드 */}
+          <label
+            htmlFor="file-upload"
+            className="flex flex-col items-center justify-center w-full h-56 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer 
+                      hover:border-indigo-500 hover:bg-indigo-50 transition-all duration-200 ease-in-out"
+          >
+            {file ? (
+              <>
+                <IoCheckmark className="text-4xl text-indigo-500" />
+                <span className="mt-2 text-lg font-medium text-gray-600">
+                  {fileName} <br /> Upload Complete!
+                </span>
+              </>
+            ) : (
+              <>
+                <IoAdd className="text-5xl text-gray-400" />
+                <span className="mt-4 text-sm font-medium text-gray-500">
+                  Click to Upload
+                </span>
+              </>
+            )}
+            <input
+              id="file-upload"
+              type="file"
+              onChange={handleFileChange}
+              className="hidden"
+            />
+          </label>
 
-    </div>
-  </Container>
-  <div className="isolate flex justify-center p-6"></div>
-</main>
-
+          {/* 업로드 버튼 */}
+          <button
+            onClick={handleUpload}
+            disabled={loading}
+            className={`mt-8 w-full inline-flex items-center justify-center px-5 py-3 text-sm font-semibold 
+                        text-white/90 rounded-xl shadow-md transition-all duration-300 ease-in-out ${
+              loading
+                ? "bg-gradient-to-r from-gray-400/70 to-gray-500/70 cursor-not-allowed"
+                : "bg-gradient-to-r from-indigo-500/80 via-purple-500/80 to-pink-500/80 hover:from-indigo-600/90 hover:via-purple-600/90 hover:to-pink-600/90"
+            } focus:outline-none focus:ring-4 focus:ring-indigo-300/50`}
+          >
+            {loading ? (
+              <>
+                <svg
+                  className="animate-spin h-5 w-5 mr-2 text-white/70"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                  ></path>
+                </svg>
+                Uploading...
+              </>
+            ) : (
+              "Upload and Process ✨"
+            )}
+          </button>
+        </div>
+      </Container>
+      <div className="isolate flex justify-center p-6"></div>
+    </main>
   );
 }

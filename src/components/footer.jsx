@@ -147,7 +147,7 @@ function SocialLinks() {
 function Copyright() {
   return (
     <div className="text-sm/6 text-gray-950">
-      &copy; {new Date().getFullYear()} Seminar Flow.
+      &copy; {new Date().getFullYear()} Paper Flow.
     </div>
   )
 }
