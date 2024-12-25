@@ -1,4 +1,5 @@
 "use client";
+
 import { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { GradientBackground } from "@/components/gradient";
@@ -148,7 +149,7 @@ export default function Done() {
   }, [paper, versionIndex, action]);
 
   // GPT 호출 & paperList에 새 버전 저장
-  const handleUpgrade = async (paperObj, verIndex) => {
+  const handleUpgrade = async (paperObj) => {
     setLoadingUpgrade(true);
     try {
       const userPrompt = `Please provide the updated Mermaid Diagram code. 
