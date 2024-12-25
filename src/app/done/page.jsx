@@ -113,15 +113,7 @@ export default function Done() {
           >
             API Key
           </label>
-          <input
-            id="api-key"
-            type="text"
-            value={apiKey}
-            onChange={(e) => setApiKey(e.target.value)}
-            placeholder="Enter your API key..."
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400
-                       focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
-          />
+         
         </div>
 
         <div className="divide-y mt-18 divide-gray-200 overflow-hidden rounded-lg bg-white shadow flex flex-col items-center">

@@ -82,7 +82,20 @@ export default function VersionList({ selectedPaper }) {
                             <div className="ml-6 flex-1 text-sm">
                               <div className="font-medium text-gray-900 sm:flex sm:justify-between">
                                 <h5>{versionName}</h5>
-                                <p className="mt-2 sm:mt-0">Seen</p>
+                                <p className="mt-2 sm:mt-0">
+                                  {
+                                    diagram.createdAt
+                                    ? new Date(diagram.createdAt).toLocaleString("en-GB", {
+                                      year: "numeric",
+                                      month: "2-digit",
+                                      day: "2-digit",
+                                      hour: "2-digit",
+                                      minute: "2-digit",
+                                      second: "2-digit",
+                                      hour12: false,
+                                    }).replace(",", "")
+                                    : "Time not available"}
+                                </p>
                               </div>
                               <p className="hidden text-gray-500 sm:mt-2 sm:block">
                                 This is the {idx + 1}-th version of the diagram.

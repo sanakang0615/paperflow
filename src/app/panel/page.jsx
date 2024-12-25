@@ -11,7 +11,7 @@ import VersionList from "@/components/version-list";
 export default function Panel() {
   const [paperList, setPaperList] = useState([]);
   const [currentPaper, setCurrentPaper] = useState("");
-  const [enhancedRatio, setEnhancedRatio] = useState(0);
+  const [graphCount, setGraphCount] = useState(0);
   const [lastUpdated, setLastUpdated] = useState("—");
   const [paperCount, setPaperCount] = useState(0);
 
@@ -30,26 +30,35 @@ export default function Panel() {
       const totalPapers = list.length;
       setPaperCount(totalPapers);
 
-      // Enhanced Ratio = 2개 이상 버전이 있는 paper / 전체 paper
-      const enhancedCount = list.filter(
-        (item) => item.MermaidList && item.MermaidList.length > 1
-      ).length;
-      const ratio =
-        totalPapers > 0
-          ? Math.round((enhancedCount / totalPapers) * 100)
-          : 0;
-      setEnhancedRatio(ratio);
+      // Graph Count = 모든 MermaidList의 그래프 총합
+      const totalGraphs = list.reduce((acc, item) => {
+        return acc + (item.MermaidList ? item.MermaidList.length : 0);
+      }, 0);
+
+      setGraphCount(totalGraphs); // Graph Count로 값 설정
+
 
       // Last Updated (paper.updatedAt 중 가장 최근)
       let newestDate = 0;
       list.forEach((paper) => {
-        if (paper.updatedAt) {
-          const t = new Date(paper.updatedAt).getTime();
-          if (t > newestDate) newestDate = t;
+        if (paper.MermaidList) {
+          paper.MermaidList.forEach((graph) => {
+            const t = new Date(graph.createdAt).getTime();
+            if (t > newestDate) newestDate = t;
+          });
         }
       });
+
       if (newestDate) {
-        const dateStr = new Date(newestDate).toLocaleString();
+        const dateStr = new Date(newestDate).toLocaleString("en-GB", {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+          hour12: false,
+        }).replace(",", ""); // 쉼표 제거
         setLastUpdated(dateStr);
       }
     }
@@ -66,8 +75,8 @@ export default function Panel() {
       stat: paperCount,
     },
     {
-      name: "Enhanced Ratio",
-      stat: enhancedRatio + "%",
+      name: "Graph Count",
+      stat: graphCount,
     },
     {
       name: "Last Updated",

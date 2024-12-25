@@ -457,7 +457,6 @@ export default function Company() {
       <Header />
       <Team />
       <Investors />
-      <Careers />
       <Footer />
     </main>
   )
